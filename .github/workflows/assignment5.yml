@@ -23,7 +23,7 @@ jobs:
             echo "=== BUILD $source ==="
             g++ "${flags[@]}" "$source" -o "build/$name"
             echo "=== RUN $source ==="
-            "build/$name" 2>&1 | tee "${source%/*}/actual_output.txt"
+            "build/$name" 2>&1 | tee "${source%.cpp}_output.txt"
           done
       - name: Confirm missing virtual is rejected
         shell: bash
@@ -56,7 +56,8 @@ jobs:
         with:
           name: assignment5-execution-evidence
           path: |
-            Task*/actual_output.txt
+            Task*/*_output.txt
             Task06/experiments/*diagnostic.txt
             Task06/experiments/*asan.txt
             Task09/asan_output.txt
+
