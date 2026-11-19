@@ -4,7 +4,7 @@
 **Register number:** 192524430  
 **Course:** DSA0101 - Object-Oriented Programming with C++ (CO5)  
 **Repository:** https://github.com/192524430simats-cmyk/DSA0101-OBJECT-ORIENTED-PROGRAMMING-C--192524430  
-**Compiler:** g++ version recorded by the Ubuntu 24.04 GitHub Actions runner.  
+**Compiler:** g++ 13.3.0 on the Ubuntu 24.04 GitHub Actions runner.
 
 ## Build and run
 
@@ -45,8 +45,8 @@ The intentionally incorrect non-virtual destructor experiment is separate under 
 | Task08 | B3 | Virtual/switch/variant timing and return-code/exception measurements |
 | Task09 | B4 | New bill and payer types, sanitizer run, final design decision |
 
-Every task folder contains its written response and supporting evidence. Executed output screenshots, measured results, and the complete PDF are included when the run workflow finishes. Source code and test inputs are stored alongside each task.
+Each task folder contains its written response, C++ source where applicable, test input, and recorded output/evidence. GitHub Actions builds and runs the task programs on pushes to `main`.
 
-## Results and evidence
+## Results
 
-`Assignment5_Report.pdf` contains the task responses, full source listings, diagrams, input/output evidence, benchmark table, and sanitizer findings. `DSA0101-192524430-ASSIGNMENT5.zip` is the complete project package. Measurements are specific to the recorded runner and should be repeated on the submission machine before final submission.
+The full assignment report includes responses to Tasks A1-A5 and B1-B4, complete source listings, diagrams, execution evidence, benchmark results, and sanitizer findings. Benchmark numbers are specific to the recorded runner and should be repeated on the submission machine before final submission.
