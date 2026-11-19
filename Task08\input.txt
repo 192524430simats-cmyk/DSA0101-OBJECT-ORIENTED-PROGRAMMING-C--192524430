@@ -1,0 +1,3 @@
+Benchmark sizes: 10, 1000, 1000000, 10000000 bills.
+Claim tests: 1000000 inputs at 0%, 1%, and 50% invalid.
+Build command: g++ -std=c++17 -O2 -Wall -Wextra benchmark.cpp -o benchmark
