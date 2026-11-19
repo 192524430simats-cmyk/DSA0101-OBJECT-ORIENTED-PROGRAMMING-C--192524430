@@ -1,0 +1,62 @@
+name: Assignment 5 build and evidence
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  assignment:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Record compiler
+        run: g++ --version | head -n 1
+      - name: Build and execute each task program
+        shell: bash
+        run: |
+          mkdir -p build
+          for source in Task[0-9][0-9]/*.cpp; do
+            [ -f "$source" ] || continue
+            name="$(basename "${source%.cpp}")"
+            flags=(-std=c++17 -Wall -Wextra)
+            if [[ "$source" == "Task08/benchmark.cpp" ]]; then flags+=(-O2); fi
+            echo "=== BUILD $source ==="
+            g++ "${flags[@]}" "$source" -o "build/$name"
+            echo "=== RUN $source ==="
+            "build/$name" 2>&1 | tee "${source%/*}/actual_output.txt"
+          done
+      - name: Confirm missing virtual is rejected
+        shell: bash
+        run: |
+          if g++ -std=c++17 Task06/experiments/nonvirtual_total.cpp -o build/should_not_build 2>Task06/experiments/nonvirtual_total_diagnostic.txt; then
+            echo "ERROR: expected a compile error when '= 0' is no longer virtual"
+            exit 1
+          else
+            echo "Expected compile failure captured: pure specifier requires a virtual function."
+            cat Task06/experiments/nonvirtual_total_diagnostic.txt
+          fi
+      - name: Demonstrate the non-virtual destructor leak
+        shell: bash
+        run: |
+          g++ -std=c++17 -Wall -Wextra -fsanitize=address -fno-omit-frame-pointer Task06/experiments/nonvirtual_destructor.cpp -o build/nonvirtual_destructor
+          set +e
+          ASAN_OPTIONS=detect_leaks=1:halt_on_error=0 build/nonvirtual_destructor >Task06/experiments/nonvirtual_destructor_asan.txt 2>&1
+          status=$?
+          set -e
+          echo "Sanitizer process status: $status"
+          cat Task06/experiments/nonvirtual_destructor_asan.txt
+          if ! grep -q "LeakSanitizer" Task06/experiments/nonvirtual_destructor_asan.txt; then
+            echo "LeakSanitizer did not report this undefined-behavior case on this runner; absence of a report does not make deletion through a non-virtual base destructor valid."
+          fi
+      - name: Check final engineering build with AddressSanitizer
+        run: |
+          g++ -std=c++17 -Wall -Wextra -fsanitize=address -fno-omit-frame-pointer Task09/final_engineering.cpp -o build/final_engineering_asan
+          ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 build/final_engineering_asan 2>&1 | tee Task09/asan_output.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: assignment5-execution-evidence
+          path: |
+            Task*/actual_output.txt
+            Task06/experiments/*diagnostic.txt
+            Task06/experiments/*asan.txt
+            Task09/asan_output.txt

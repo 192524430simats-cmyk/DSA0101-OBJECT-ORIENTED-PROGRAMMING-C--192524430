@@ -4,7 +4,7 @@
 **Register number:** 192524430  
 **Course:** DSA0101 - Object-Oriented Programming with C++ (CO5)  
 **Repository:** https://github.com/192524430simats-cmyk/DSA0101-OBJECT-ORIENTED-PROGRAMMING-C--192524430  
-**Compiler:** g++ 13.3.0 (MinGW-w64/UCRT for local command compatibility; GitHub Actions uses Ubuntu g++)  
+**Compiler:** g++ version recorded by the Ubuntu 24.04 GitHub Actions runner.  
 
 ## Build and run
 
@@ -50,4 +50,3 @@ Every task folder contains its written response and supporting evidence. Execute
 ## Results and evidence
 
 `Assignment5_Report.pdf` contains the task responses, full source listings, diagrams, input/output evidence, benchmark table, and sanitizer findings. `DSA0101-192524430-ASSIGNMENT5.zip` is the complete project package. Measurements are specific to the recorded runner and should be repeated on the submission machine before final submission.
-
