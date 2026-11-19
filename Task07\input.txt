@@ -1,0 +1,6 @@
+Valid claim: billed=40000 cover=50000
+Over-cover claim: billed=60000 cover=50000
+Negative claim: billed=-1 cover=50000
+Invalid numeric token: not-a-number
+Unknown package: X9
+Allocation failure demonstration: request operator new at SIZE_MAX (no large memory is touched).
