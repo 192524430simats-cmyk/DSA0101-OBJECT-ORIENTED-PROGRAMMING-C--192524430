@@ -1,10 +1,7 @@
-#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <iomanip>
 #include <iostream>
-#include <memory>
-#include <stdexcept>
 #include <variant>
 #include <vector>
 
@@ -20,23 +17,18 @@ using Clock = std::chrono::steady_clock;
 
 template<class F> double measureMs(F&& fn) {
     const auto start = Clock::now();
-    sink = fn();
-    return std::chrono::duration<double, std::milli>(Clock::now() - start).count();
+    const double sum = fn();
+    const auto stop = Clock::now();
+    sink = sum;
+    return std::chrono::duration<double, std::milli>(stop - start).count();
 }
-double runVirtual(std::size_t n) {
-    static const OP op; static const IP ip;
-    std::vector<const Bill*> bills; bills.reserve(n);
-    for (std::size_t i=0;i<n;++i) bills.push_back(i%2 ? static_cast<const Bill*>(&op) : static_cast<const Bill*>(&ip));
+double sumVirtual(const std::vector<const Bill*>& bills) {
     double sum=0; for (const Bill* b:bills) sum+=b->total(); return sum;
 }
-double runSwitch(std::size_t n) {
-    std::vector<Record> bills(n);
-    for (std::size_t i=0;i<n;++i) bills[i] = {static_cast<int>(i%2),1700.0,47500.0};
+double sumSwitch(const std::vector<Record>& bills) {
     double sum=0; for (const auto& b:bills) sum += b.kind==0 ? b.op : b.ip; return sum;
 }
-double runVariant(std::size_t n) {
-    std::vector<BillVariant> bills; bills.reserve(n);
-    for (std::size_t i=0;i<n;++i) bills.emplace_back(i%2 ? BillVariant{OpValue{1700.0}} : BillVariant{IpValue{47500.0}});
+double sumVariant(const std::vector<BillVariant>& bills) {
     double sum=0; for (const auto& b:bills) sum += std::visit([](const auto& x){return x.value;},b); return sum;
 }
 bool validReturn(double amount) { return amount>=0 && amount<=50000; }
@@ -59,18 +51,25 @@ double testExceptions(std::size_t n,std::size_t bad) {
     return static_cast<double>(accepted);
 }
 int main() {
+    static const OP op; static const IP ip;
     std::cout<<std::fixed<<std::setprecision(3);
     for (std::size_t n : {10u,1000u,1000000u,10000000u}) {
-        const double v=measureMs([&]{return runVirtual(n);});
+        std::vector<const Bill*> virtualBills; virtualBills.reserve(n);
+        for(std::size_t i=0;i<n;++i) virtualBills.push_back(i%2 ? static_cast<const Bill*>(&op) : static_cast<const Bill*>(&ip));
+        const double virtualMs=measureMs([&]{return sumVirtual(virtualBills);});
         const double virtualSum=sink;
-        const double s=measureMs([&]{return runSwitch(n);});
+        std::vector<Record> switchBills; switchBills.reserve(n);
+        for(std::size_t i=0;i<n;++i) switchBills.push_back({static_cast<int>(i%2),1700.0,47500.0});
+        const double switchMs=measureMs([&]{return sumSwitch(switchBills);});
         const double switchSum=sink;
-        const double w=measureMs([&]{return runVariant(n);});
+        std::vector<BillVariant> variantBills; variantBills.reserve(n);
+        for(std::size_t i=0;i<n;++i) variantBills.emplace_back(i%2 ? BillVariant{OpValue{1700.0}} : BillVariant{IpValue{47500.0}});
+        const double variantMs=measureMs([&]{return sumVariant(variantBills);});
         const double variantSum=sink;
         const double expected=static_cast<double>((n+1)/2)*47500.0+static_cast<double>(n/2)*1700.0;
-        std::cout<<"dispatch n="<<n<<" virtual_ms="<<v<<" switch_ms="<<s<<" variant_ms="<<w
+        std::cout<<"dispatch n="<<n<<" virtual_ms="<<virtualMs<<" switch_ms="<<switchMs<<" variant_ms="<<variantMs
                  <<" equal="<<((virtualSum==expected && switchSum==expected && variantSum==expected)?"yes":"NO")
-                 <<" expected_sum="<<expected<<'\n';
+                 <<" expected_sum="<<expected<<" setup_excluded=yes\n";
     }
     constexpr std::size_t n=1000000;
     for (double rate : {0.0,0.01,0.50}) {
@@ -81,3 +80,4 @@ int main() {
                  <<std::setprecision(3)<<r<<" exception_ms="<<e<<" accepted="<<(n-bad)<<'\n';
     }
 }
+
