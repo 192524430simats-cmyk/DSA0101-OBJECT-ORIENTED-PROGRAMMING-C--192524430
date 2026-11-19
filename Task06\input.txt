@@ -1,0 +1,7 @@
+Task B1 hand-check values:
+OP: 500 + 1200 = 1700
+IP: 3 * 2500 + 40000 = 47500
+DayCare: package = 22000
+Emergency: 5000 + 4 * 1500 = 11000
+Insurance pays min(50000, 80% of total).
+Government pays min(package rate by bill type, total).
